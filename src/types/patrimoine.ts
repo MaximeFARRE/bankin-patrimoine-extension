@@ -53,6 +53,9 @@ export type ExtensionSettings = {
   appImportUrl?: string;
   importKey?: string;
   defaultStartDate?: string;
+  includeAccountsWithoutTransactions?: boolean;
+  showCsvExport?: boolean;
+  debugMode?: boolean;
 };
 
 export type ImportResult = {
