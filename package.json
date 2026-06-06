@@ -1,0 +1,24 @@
+{
+  "name": "bankin-patrimoine-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Extension Chrome privee pour exporter les donnees Bankin vers une application patrimoine.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "zip": "npm run build && node scripts/zip.js"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^25.9.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "eslint": "^9.17.0",
+    "globals": "^17.6.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}
