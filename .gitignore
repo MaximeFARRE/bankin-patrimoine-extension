@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+.env.local
+*.zip
+bankin-export-*.json
+bankin-export-*.csv
