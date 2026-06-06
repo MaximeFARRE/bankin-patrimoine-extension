@@ -27,5 +27,5 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     ],
     types: ["xmlhttprequest"]
   },
-  ["requestHeaders"]
+  ["requestHeaders", "extraHeaders"]
 );
