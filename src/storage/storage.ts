@@ -5,7 +5,10 @@ const BANKIN_HEADERS_KEY = "bankinHeaders";
 const SETTINGS_KEY = "settings";
 
 const defaultSettings: ExtensionSettings = {
-  appImportUrl: "http://localhost:3000/api/import/bankin"
+  appImportUrl: "http://localhost:3000/api/import/bankin",
+  includeAccountsWithoutTransactions: true,
+  showCsvExport: true,
+  debugMode: false
 };
 
 export async function saveBankinHeaders(headers: BankinHeaders): Promise<void> {
@@ -19,6 +22,10 @@ export async function getBankinHeaders(): Promise<BankinHeaders | null> {
 
 export async function clearBankinHeaders(): Promise<void> {
   await chrome.storage.local.remove(BANKIN_HEADERS_KEY);
+}
+
+export async function clearAllLocalData(): Promise<void> {
+  await chrome.storage.local.remove([BANKIN_HEADERS_KEY, SETTINGS_KEY]);
 }
 
 export async function saveSettings(settings: ExtensionSettings): Promise<void> {

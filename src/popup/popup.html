@@ -12,6 +12,9 @@
         <h1>Patrimoine Bankin Exporter</h1>
         <p id="sessionStatus">Session Bankin : non detectee</p>
         <p id="captureTime">Derniere capture : jamais</p>
+        <p id="sessionHelp" class="help">
+          Ouvre Bankin Web, connecte-toi, puis navigue dans les comptes pour capturer la session.
+        </p>
       </header>
 
       <section id="mainView" class="view">
@@ -28,6 +31,7 @@
 
         <div class="actions">
           <button id="testConnectionButton" type="button">Tester la connexion</button>
+          <button id="previewButton" type="button">Previsualiser</button>
           <button id="exportJsonButton" type="button">Exporter JSON</button>
           <button id="exportCsvButton" type="button">Exporter CSV</button>
           <button id="sendToAppButton" type="button">Envoyer vers mon app</button>
@@ -51,8 +55,21 @@
           Date de debut par defaut
           <input id="defaultStartDateInput" type="date" />
         </label>
+        <label class="check-row">
+          <input id="includeEmptyAccountsInput" type="checkbox" />
+          Inclure les comptes sans transaction
+        </label>
+        <label class="check-row">
+          <input id="showCsvExportInput" type="checkbox" />
+          Afficher l'export CSV
+        </label>
+        <label class="check-row">
+          <input id="debugModeInput" type="checkbox" />
+          Activer le diagnostic detaille
+        </label>
         <div class="actions">
           <button id="saveSettingsButton" type="button">Enregistrer</button>
+          <button id="clearAllButton" type="button" class="danger">Effacer toutes les donnees locales</button>
           <button id="backButton" type="button" class="secondary">Retour</button>
         </div>
       </section>

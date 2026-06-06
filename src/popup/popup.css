@@ -26,6 +26,16 @@ p {
   color: #526173;
 }
 
+.help {
+  display: none;
+  margin-top: 8px;
+  color: #7c4a03;
+}
+
+.help.visible {
+  display: block;
+}
+
 .view {
   display: grid;
   gap: 14px;
@@ -47,6 +57,17 @@ label {
   font-size: 12px;
   font-weight: 600;
   color: #344256;
+}
+
+.check-row {
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.check-row input {
+  min-height: auto;
 }
 
 input {
@@ -106,4 +127,12 @@ button.danger:hover {
   padding-top: 12px;
   color: #263445;
   white-space: pre-line;
+}
+
+.summary.error {
+  color: #8f2626;
+}
+
+.summary.warning {
+  color: #7c4a03;
 }
