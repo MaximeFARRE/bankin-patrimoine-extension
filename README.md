@@ -1,86 +1,201 @@
 # Patrimoine Bankin Exporter
 
-Extension Chrome privee permettant d'exporter les donnees Bankin vers une application patrimoine.
+Chrome extension that exports Bankin Web data into a clean JSON/CSV format for personal finance and net-worth tracking apps.
 
-## Important
+The extension runs locally in the user's browser. It does not ask for Bankin credentials, does not store passwords, and does not send Bankin authentication headers to any third-party server.
 
-Cette extension est non officielle et n'est pas affiliee a Bankin.
-Elle est destinee a un usage prive.
-Elle ne demande jamais les identifiants Bankin.
-Elle fonctionne uniquement si l'utilisateur est deja connecte a Bankin Web.
-Les headers Bankin restent stockes localement dans le navigateur et ne sont jamais envoyes a l'application patrimoine.
+> Non-official project. This extension is not affiliated with, endorsed by, or sponsored by Bankin.
 
-## Installation
+## What It Does
 
-1. Cloner le repo.
-2. Installer les dependances avec `npm install`.
-3. Construire l'extension avec `npm run build`.
-4. Ouvrir `chrome://extensions`.
-5. Activer le mode developpeur.
-6. Cliquer sur `Charger l'extension non empaquetee`.
-7. Selectionner le dossier `dist/`.
-8. Ouvrir Bankin Web et se connecter.
-9. Naviguer dans Bankin pour declencher la capture de session.
-10. Cliquer sur l'extension.
+- Detects an active Bankin Web session.
+- Captures the required Bankin API request headers locally in `chrome.storage.local`.
+- Fetches accounts, categories, and transactions from Bankin's web API.
+- Handles pagination.
+- Normalizes Bankin data into a stable `PatrimoineBankinExport` JSON format.
+- Exports JSON and optional CSV files.
+- Displays a clear export summary: accounts, categories, transactions, period, validation warnings, and errors.
+- Can optionally send the normalized export to a configured personal app endpoint.
 
-## Utilisation
+## What It Does Not Do
 
-1. Ouvrir Bankin Web dans Chrome et se connecter normalement.
-2. Ouvrir quelques pages de comptes ou transactions pour que Chrome capture les headers API.
-3. Ouvrir le popup `Patrimoine Bankin Exporter`.
-4. Tester la connexion.
-5. Choisir une periode si besoin.
-6. Previsualiser l'export pour verifier les volumes, la periode et les avertissements.
-7. Exporter en JSON ou CSV.
+- It never asks for your Bankin password.
+- It never stores Bankin credentials.
+- It never sends Bankin tokens or headers to the target patrimoine app.
+- It does not scrape Bankin from a server.
+- It does not connect to Bankin on your behalf.
+- It does not provide financial advice, budget analysis, charts, or PDF reports.
 
-Le JSON produit respecte le format `PatrimoineBankinExport`.
-Avant telechargement ou import, l'extension valide localement les champs obligatoires, les liens comptes/categories et les doublons d'identifiants Bankin.
-Les collisions de hash sont affichees comme avertissements, car plusieurs transactions reelles peuvent partager le meme compte, la meme date, le meme montant et le meme libelle.
+## Current Status
 
-## Parametres
+The extension is in early public beta.
 
-L'ecran parametres permet de configurer :
-
-- l'URL d'import de l'application patrimoine, par defaut `http://localhost:3000/api/import/bankin` ;
-- la cle d'import utilisateur ;
-- une date de debut par defaut.
-- l'inclusion ou non des comptes sans transaction sur la periode ;
-- l'affichage ou non du bouton CSV ;
-- le mode diagnostic detaille.
-
-La cle d'import sert uniquement a l'application patrimoine. Elle n'a aucun lien avec Bankin.
-Le diagnostic detaille affiche uniquement la presence des headers et le dernier statut HTTP, jamais la valeur des headers Bankin.
-
-## Developpement
-
-Scripts disponibles :
-
-- `npm run dev` : build Vite en mode watch ;
-- `npm run build` : build de production dans `dist/` ;
-- `npm run typecheck` : verification TypeScript ;
-- `npm run lint` : lint du code TypeScript ;
-- `npm run test` : tests unitaires ;
-- `npm run zip` : genere une archive versionnee.
-
-## Build
-
-```bash
-npm install
-npm run build
-```
-
-Le dossier `dist/` est le dossier a charger dans Chrome.
-
-## Maintenance Bankin
-
-Si Bankin change ses endpoints ou headers, modifier :
+The core export flow has been tested against a real Bankin Web session, but Bankin's internal API can change without notice. If an endpoint or required header changes, update:
 
 - `src/bankin/endpoints.ts`
 - `src/bankin/captureHeaders.ts`
 - `src/bankin/bankinClient.ts`
 
-## Notes Pécunio
+## Data And Privacy
 
-Pecunio utilise `https://sync.bankin.com` avec les endpoints `/v2/accounts?limit=500`, `/v2/categories?limit=200` et `/v2/transactions?limit=500`, puis suit `pagination.next_uri`.
-Les headers observes comme necessaires sont `Authorization`, `Bankin-Version`, `Client-Id` et `Client-Secret`.
-Cette extension reprend uniquement ces idees d'integration et reconstruit une base minimaliste dediee a l'export patrimoine.
+Bankin session headers are stored only in the user's local Chrome extension storage. Exported files are generated locally by the browser.
+
+If the optional "Send to my app" action is used, only the normalized patrimoine export is sent to the configured URL. Bankin authentication headers are never included in that request.
+
+Read the full privacy notes in [PRIVACY.md](PRIVACY.md).
+
+## Installation For Local Testing
+
+```bash
+git clone https://github.com/MaximeFARRE/bankin-patrimoine-extension.git
+cd bankin-patrimoine-extension
+npm install
+npm run build
+```
+
+Then in Chrome:
+
+1. Open `chrome://extensions`.
+2. Enable Developer mode.
+3. Click `Load unpacked`.
+4. Select the `dist/` folder.
+5. Open Bankin Web and sign in normally.
+6. Navigate through accounts or transactions so the extension can capture the active session.
+7. Open the extension popup.
+
+## Usage
+
+1. Open Bankin Web and sign in normally.
+2. Open a Bankin page that triggers API calls, such as accounts or transactions.
+3. Open the extension popup.
+4. Click `Test connection`.
+5. Choose a date range if needed.
+6. Click `Preview` to check counts, period, and validation warnings.
+7. Export JSON or CSV.
+
+The extension validates the export before download or import:
+
+- required account/category/transaction fields;
+- account and category references;
+- duplicate Bankin transaction IDs;
+- duplicate transaction hashes.
+
+Duplicate transaction hashes are warnings, not blocking errors, because real transactions can share the same account, date, amount, currency, and normalized label.
+
+## Optional App Import
+
+The popup settings can configure:
+
+- `appImportUrl`, for example `http://localhost:3000/api/import/bankin`;
+- `importKey`;
+- default start date;
+- whether to include accounts without transactions in the selected period;
+- whether to show the CSV export button;
+- diagnostic mode.
+
+The expected app endpoint is:
+
+```http
+POST /api/import/bankin
+Content-Type: application/json
+X-Import-Key: <user-import-key>
+```
+
+The request body is a `PatrimoineBankinExport`. Bankin headers are never sent.
+
+## Export Format
+
+Top-level JSON shape:
+
+```ts
+type PatrimoineBankinExport = {
+  source: "bankin";
+  exportedAt: string;
+  exportVersion: "1.0";
+  accounts: PatrimoineAccount[];
+  categories: PatrimoineCategory[];
+  transactions: PatrimoineTransaction[];
+  metadata: {
+    transactionCount: number;
+    accountCount: number;
+    categoryCount: number;
+    fromDate?: string;
+    toDate?: string;
+  };
+};
+```
+
+See [src/types/patrimoine.ts](src/types/patrimoine.ts) for the full schema.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Useful commands:
+
+```bash
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+npm run zip
+```
+
+The Chrome-loadable extension is built into `dist/`.
+
+## Packaging
+
+```bash
+npm run zip
+```
+
+This creates a versioned archive:
+
+```text
+patrimoine-bankin-exporter-<version>.zip
+```
+
+## Repository Structure
+
+```text
+src/
+  background.ts
+  popup/
+  bankin/
+  export/
+  app/
+  storage/
+  types/
+  utils/
+```
+
+## Publication Notes
+
+For normal users and automatic updates, Chrome Web Store distribution is recommended. An unlisted or public listing can both be free and can both receive automatic updates through Chrome.
+
+Self-hosted CRX updates are not a good default for regular Chrome users on macOS/Windows unless they are in a managed enterprise environment.
+
+## Security
+
+Please do not open public issues containing personal financial data, Bankin headers, exported JSON files, import keys, screenshots with account balances, or any other sensitive information.
+
+See [SECURITY.md](SECURITY.md) for responsible disclosure guidance.
+
+## Contributing
+
+Contributions are welcome, especially around:
+
+- Bankin endpoint/header compatibility;
+- export validation;
+- import format stability;
+- tests;
+- Chrome Web Store packaging.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
