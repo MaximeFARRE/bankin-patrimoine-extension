@@ -9,6 +9,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
+    "test": "vitest run",
     "zip": "npm run build && node scripts/zip.js"
   },
   "devDependencies": {
@@ -19,6 +20,7 @@
     "eslint": "^9.17.0",
     "globals": "^17.6.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^4.1.8"
   }
 }
