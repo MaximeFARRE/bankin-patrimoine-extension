@@ -30,9 +30,12 @@ Les headers Bankin restent stockes localement dans le navigateur et ne sont jama
 3. Ouvrir le popup `Patrimoine Bankin Exporter`.
 4. Tester la connexion.
 5. Choisir une periode si besoin.
-6. Exporter en JSON ou CSV.
+6. Previsualiser l'export pour verifier les volumes, la periode et les avertissements.
+7. Exporter en JSON ou CSV.
 
 Le JSON produit respecte le format `PatrimoineBankinExport`.
+Avant telechargement ou import, l'extension valide localement les champs obligatoires, les liens comptes/categories et les doublons d'identifiants Bankin.
+Les collisions de hash sont affichees comme avertissements, car plusieurs transactions reelles peuvent partager le meme compte, la meme date, le meme montant et le meme libelle.
 
 ## Parametres
 
@@ -41,8 +44,12 @@ L'ecran parametres permet de configurer :
 - l'URL d'import de l'application patrimoine, par defaut `http://localhost:3000/api/import/bankin` ;
 - la cle d'import utilisateur ;
 - une date de debut par defaut.
+- l'inclusion ou non des comptes sans transaction sur la periode ;
+- l'affichage ou non du bouton CSV ;
+- le mode diagnostic detaille.
 
 La cle d'import sert uniquement a l'application patrimoine. Elle n'a aucun lien avec Bankin.
+Le diagnostic detaille affiche uniquement la presence des headers et le dernier statut HTTP, jamais la valeur des headers Bankin.
 
 ## Developpement
 
@@ -52,7 +59,8 @@ Scripts disponibles :
 - `npm run build` : build de production dans `dist/` ;
 - `npm run typecheck` : verification TypeScript ;
 - `npm run lint` : lint du code TypeScript ;
-- `npm run zip` : genere une archive.
+- `npm run test` : tests unitaires ;
+- `npm run zip` : genere une archive versionnee.
 
 ## Build
 

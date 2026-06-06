@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from "node:fs/promises";
+import { copyFile, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type PluginOption } from "vite";
@@ -14,6 +14,7 @@ function copyManifest(): PluginOption {
       await mkdir(dirname(manifestDestination), { recursive: true });
       await copyFile(resolve(rootDir, "manifest.json"), manifestDestination);
       await copyFile(resolve(rootDir, "dist/src/popup/popup.html"), popupDestination);
+      await rm(resolve(rootDir, "dist/src"), { recursive: true, force: true });
     }
   };
 }

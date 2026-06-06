@@ -1,7 +1,8 @@
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
-const output = "patrimoine-bankin-exporter.zip";
+const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+const output = `patrimoine-bankin-exporter-${packageJson.version}.zip`;
 
 if (!existsSync("dist")) {
   throw new Error("Le dossier dist/ est introuvable. Lance npm run build avant npm run zip.");
