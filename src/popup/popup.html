@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patrimoine Bankin Exporter</title>
+    <script type="module" src="./popup.ts"></script>
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header>
+        <h1>Patrimoine Bankin Exporter</h1>
+        <p id="sessionStatus">Session Bankin : non detectee</p>
+        <p id="captureTime">Derniere capture : jamais</p>
+      </header>
+
+      <section id="mainView" class="view">
+        <div class="date-grid">
+          <label>
+            Depuis
+            <input id="sinceInput" type="date" />
+          </label>
+          <label>
+            Jusqu'a
+            <input id="untilInput" type="date" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="testConnectionButton" type="button">Tester la connexion</button>
+          <button id="exportJsonButton" type="button">Exporter JSON</button>
+          <button id="exportCsvButton" type="button">Exporter CSV</button>
+          <button id="sendToAppButton" type="button">Envoyer vers mon app</button>
+          <button id="settingsButton" type="button" class="secondary">Parametres</button>
+          <button id="clearSessionButton" type="button" class="danger">Effacer la session capturee</button>
+        </div>
+
+        <section id="summary" class="summary" aria-live="polite"></section>
+      </section>
+
+      <section id="settingsView" class="view hidden">
+        <label>
+          URL de l'application patrimoine
+          <input id="appImportUrlInput" type="url" placeholder="http://localhost:3000/api/import/bankin" />
+        </label>
+        <label>
+          Cle d'import
+          <input id="importKeyInput" type="password" />
+        </label>
+        <label>
+          Date de debut par defaut
+          <input id="defaultStartDateInput" type="date" />
+        </label>
+        <div class="actions">
+          <button id="saveSettingsButton" type="button">Enregistrer</button>
+          <button id="backButton" type="button" class="secondary">Retour</button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
