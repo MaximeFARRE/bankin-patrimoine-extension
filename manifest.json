@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Patrimoine Bankin Exporter",
   "version": "1.0.0",
-  "description": "Export prive des donnees Bankin vers l'application patrimoine.",
+  "description": "Export local des donnees Bankin vers un format JSON/CSV propre pour le suivi patrimoine.",
   "permissions": ["storage", "webRequest", "downloads"],
   "host_permissions": [
     "https://*.bankin.com/*",

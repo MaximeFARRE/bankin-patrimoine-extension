@@ -2,7 +2,24 @@
   "name": "bankin-patrimoine-extension",
   "version": "1.0.0",
   "private": true,
-  "description": "Extension Chrome privee pour exporter les donnees Bankin vers une application patrimoine.",
+  "description": "Chrome extension to locally export Bankin Web data to a clean patrimoine tracking format.",
+  "license": "MIT",
+  "author": "Maxime FARRE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaximeFARRE/bankin-patrimoine-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MaximeFARRE/bankin-patrimoine-extension/issues"
+  },
+  "homepage": "https://github.com/MaximeFARRE/bankin-patrimoine-extension#readme",
+  "keywords": [
+    "chrome-extension",
+    "bankin",
+    "personal-finance",
+    "export",
+    "typescript"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite build --watch",
