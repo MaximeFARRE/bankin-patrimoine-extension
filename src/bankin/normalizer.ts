@@ -55,6 +55,21 @@ export function normalizeAccount(account: BankinAccount): PatrimoineAccount {
   };
 }
 
+function normalizeTransactionAccount(transaction: BankinTransaction): PatrimoineAccount | null {
+  const sourceAccountId = getTransactionAccountId(transaction);
+  if (!sourceAccountId) {
+    return null;
+  }
+
+  return {
+    source: "bankin",
+    sourceAccountId,
+    accountName: transaction.account?.name ?? `Compte Bankin ${sourceAccountId}`,
+    bankName: transaction.account?.bank?.name,
+    currency: getCurrency(transaction)
+  };
+}
+
 export function normalizeCategory(category: BankinCategory): PatrimoineCategory {
   return {
     source: "bankin",
@@ -108,18 +123,31 @@ export async function normalizeBankinExport(raw: BankinRawExport): Promise<Patri
   const transactions = await Promise.all(
     raw.transactions.map((transaction) => normalizeTransaction(transaction, accountsById, categoriesById))
   );
+  const normalizedAccounts = raw.accounts.map(normalizeAccount);
+  const normalizedAccountsById = new Map(
+    normalizedAccounts.map((account) => [account.sourceAccountId, account])
+  );
+
+  for (const transaction of raw.transactions) {
+    const account = normalizeTransactionAccount(transaction);
+    if (account && !normalizedAccountsById.has(account.sourceAccountId)) {
+      normalizedAccountsById.set(account.sourceAccountId, account);
+    }
+  }
+
+  const accounts = Array.from(normalizedAccountsById.values());
   const range = getDateRange(transactions.map((transaction) => transaction.date));
 
   return {
     source: "bankin",
     exportedAt: new Date().toISOString(),
     exportVersion: "1.0",
-    accounts: raw.accounts.map(normalizeAccount),
+    accounts,
     categories: categories.map(normalizeCategory),
     transactions,
     metadata: {
       transactionCount: transactions.length,
-      accountCount: raw.accounts.length,
+      accountCount: accounts.length,
       categoryCount: categories.length,
       ...range
     }

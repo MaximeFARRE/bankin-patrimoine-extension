@@ -46,4 +46,39 @@ describe("normalizeBankinExport", () => {
     });
     expect(normalized.transactions[0]?.transactionHash).toHaveLength(64);
   });
+
+  it("adds accounts only referenced by transactions", async () => {
+    const raw: BankinRawExport = {
+      accounts: [],
+      categories: [],
+      transactions: [
+        {
+          id: 999,
+          account: {
+            id: 123,
+            name: "Compte archive",
+            bank: { name: "Banque test" }
+          },
+          description: "Transaction historique",
+          amount: -12,
+          date: "2026-06-06",
+          currency_code: "EUR"
+        }
+      ]
+    };
+
+    const normalized = await normalizeBankinExport(raw);
+
+    expect(normalized.accounts).toEqual([
+      {
+        source: "bankin",
+        sourceAccountId: "123",
+        accountName: "Compte archive",
+        bankName: "Banque test",
+        currency: "EUR"
+      }
+    ]);
+    expect(normalized.metadata.accountCount).toBe(1);
+    expect(normalized.transactions[0]?.sourceAccountId).toBe("123");
+  });
 });
