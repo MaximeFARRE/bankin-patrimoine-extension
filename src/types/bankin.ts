@@ -15,6 +15,7 @@ export type BankinAccount = {
   currency_code?: string;
   currency?: string;
   type?: string;
+  subtype?: string;
   bank?: {
     id?: number | string;
     name?: string;
@@ -61,6 +62,13 @@ export type BankinRawExport = {
   accounts: BankinAccount[];
   categories: BankinCategory[];
   transactions: BankinTransaction[];
+};
+
+export type BankinObservedResource = {
+  resourcePath: string;
+  method: string;
+  callCount: number;
+  lastObservedAt: string;
 };
 
 export type BankinApiResponse<T> = {
