@@ -1,5 +1,5 @@
 import { extractBankinHeaders } from "./bankin/captureHeaders";
-import { saveBankinHeaders } from "./storage/storage";
+import { recordBankinResource, saveBankinHeaders } from "./storage/storage";
 import { logger } from "./utils/logger";
 
 logger.info("service worker pret");
@@ -12,7 +12,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       return;
     }
 
-    void saveBankinHeaders(headers)
+    void Promise.all([saveBankinHeaders(headers), recordBankinResource(details.url, details.method)])
       .then(() => {
         logger.info("headers Bankin captures", { capturedAt: headers.capturedAt });
       })
