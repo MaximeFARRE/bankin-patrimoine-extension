@@ -78,6 +78,22 @@ describe("validatePatrimoineExport", () => {
     expect(result.errors[0]?.code).toBe("unknown_account");
   });
 
+  it("fails when a loan references an unknown account", () => {
+    const result = validatePatrimoineExport(buildExport({
+      loans: [{
+        source: "bankin",
+        sourceLoanId: "loan-1",
+        sourceAccountId: "missing-account",
+        loanType: "mortgage",
+        outstandingPrincipal: 100,
+        currency: "EUR"
+      }]
+    }));
+
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]?.code).toBe("unknown_portfolio_account");
+  });
+
   it("warns but stays valid for duplicated hashes", () => {
     const base = buildExport().transactions[0];
     const result = validatePatrimoineExport(buildExport({

@@ -184,13 +184,20 @@ function applyAccountSettings(data: PatrimoineBankinExport): PatrimoineBankinExp
 
   const accountIdsWithTransactions = new Set(data.transactions.map((transaction) => transaction.sourceAccountId));
   const accounts = data.accounts.filter((account) => accountIdsWithTransactions.has(account.sourceAccountId));
+  const includedAccountIds = new Set(accounts.map((account) => account.sourceAccountId));
+  const loans = data.loans.filter((loan) => includedAccountIds.has(loan.sourceAccountId));
+  const positions = data.positions.filter((position) => includedAccountIds.has(position.sourceAccountId));
 
   return {
     ...data,
     accounts,
+    loans,
+    positions,
     metadata: {
       ...data.metadata,
-      accountCount: accounts.length
+      accountCount: accounts.length,
+      loanCount: loans.length,
+      positionCount: positions.length
     }
   };
 }

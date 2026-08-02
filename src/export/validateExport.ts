@@ -129,6 +129,16 @@ export function validatePatrimoineExport(data: PatrimoineBankinExport): ExportVa
     });
   }
 
+  const orphanLoans = data.loans.filter((loan) => !accountIds.has(loan.sourceAccountId)).length;
+  const orphanPositions = data.positions.filter((position) => !accountIds.has(position.sourceAccountId)).length;
+  if (orphanLoans > 0 || orphanPositions > 0) {
+    issues.push({
+      severity: "error",
+      code: "unknown_portfolio_account",
+      message: `${orphanLoans} credit(s) et ${orphanPositions} position(s) referencent un compte absent de l'export.`
+    });
+  }
+
   const unknownCategories = data.transactions.filter(
     (transaction) => transaction.sourceCategoryId && !categoryIds.has(transaction.sourceCategoryId)
   ).length;
