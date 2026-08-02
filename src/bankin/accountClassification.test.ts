@@ -14,6 +14,7 @@ describe("classifyBankinAccount", () => {
     ["Compte titres", "investment", "cto"],
     ["Credit immobilier", "loan", "mortgage"],
     ["Pret consommation", "loan", "consumer_loan"],
+    ["Credit a la consommation", "loan", "consumer_loan"],
     ["Pret etudiant", "loan", "student_loan"]
   ] as const)("infers %s conservatively", (name, accountKind, accountSubtype) => {
     expect(classifyBankinAccount({ name })).toMatchObject({ accountKind, accountSubtype });

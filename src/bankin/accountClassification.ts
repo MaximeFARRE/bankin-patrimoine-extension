@@ -46,9 +46,9 @@ function classifyText(value?: string): KindAndSubtype | null {
     [/\b(?:lep|livret epargne populaire)\b/, { accountKind: "savings", accountSubtype: "lep" }],
     [/\bpel\b/, { accountKind: "savings", accountSubtype: "pel" }],
     [/\bcel\b/, { accountKind: "savings", accountSubtype: "cel" }],
-    [/\b(?:credit|pret)\s+(?:immobilier|immo)\b/, { accountKind: "loan", accountSubtype: "mortgage" }],
-    [/\b(?:credit|pret)\s+(?:consommation|conso)\b/, { accountKind: "loan", accountSubtype: "consumer_loan" }],
-    [/\b(?:credit|pret)\s+etudiant\b/, { accountKind: "loan", accountSubtype: "student_loan" }]
+    [/\b(?:(?:credit|pret).*\b(?:immobilier|immo)|mortgage)\b/, { accountKind: "loan", accountSubtype: "mortgage" }],
+    [/\b(?:(?:credit|pret).*\b(?:consommation|conso)|consumer loan)\b/, { accountKind: "loan", accountSubtype: "consumer_loan" }],
+    [/\b(?:(?:credit|pret).*\betudiant|student loan)\b/, { accountKind: "loan", accountSubtype: "student_loan" }]
   ];
   return rules.find(([pattern]) => pattern.test(text))?.[1] ?? null;
 }
