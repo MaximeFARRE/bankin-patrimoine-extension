@@ -30,6 +30,15 @@ describe("normalizeBankinExport", () => {
           amount: -42.1,
           date: "2026-06-06",
           currency_code: "EUR"
+        },
+        {
+          id: 1000,
+          account_id: 123,
+          category_id: 2,
+          description: "Supermarche",
+          amount: -42.1,
+          date: "2026-06-06",
+          currency_code: "EUR"
         }
       ]
     };
@@ -55,6 +64,10 @@ describe("normalizeBankinExport", () => {
       categoryName: "Courses"
     });
     expect(normalized.transactions[0]?.transactionHash).toHaveLength(64);
+    expect(normalized.metadata.validation).toEqual({
+      repeatedTransactionHashes: { groupCount: 1, affectedLineCount: 2, excessLineCount: 1 },
+      duplicatedSourceTransactionIds: { groupCount: 0, affectedLineCount: 0, excessLineCount: 0 }
+    });
   });
 
   it("exports synthetic savings, investment, loan, unknown and foreign-currency accounts", async () => {
