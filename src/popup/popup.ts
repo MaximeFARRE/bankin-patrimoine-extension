@@ -8,6 +8,10 @@ import {
   type BankinProgressEvent
 } from "../bankin/bankinClient";
 import { normalizeBankinExport } from "../bankin/normalizer";
+import {
+  buildSecureDiagnosticReport,
+  type SecureBankinDiagnosticReport
+} from "../bankin/secureDiagnostics";
 import { downloadCsvExport } from "../export/exportCsv";
 import { downloadJsonExport } from "../export/exportJson";
 import { validatePatrimoineExport, type ExportValidationResult } from "../export/validateExport";
@@ -15,6 +19,7 @@ import {
   clearAllLocalData,
   clearBankinHeaders,
   getBankinHeaders,
+  getObservedBankinResources,
   getSettings,
   saveSettings
 } from "../storage/storage";
@@ -49,6 +54,7 @@ const buttons = {
 };
 
 let lastExport: PatrimoineBankinExport | null = null;
+let lastDiagnosticReport: SecureBankinDiagnosticReport | null = null;
 let currentSettings: ExtensionSettings = {};
 
 function setSummary(message: string, tone: "default" | "warning" | "error" = "default"): void {
@@ -116,6 +122,26 @@ function renderDiagnostics(diagnostics: BankinDiagnostics): string[] {
   ];
 }
 
+function renderSecureDiagnostics(report: SecureBankinDiagnosticReport | null): string[] {
+  if (!currentSettings.debugMode || !report) return [];
+
+  const relationships = report.relationships;
+  return [
+    "Diagnostic securise :",
+    ...report.observedResources.map(
+      (resource) => `${resource.method} ${resource.resourcePath} : ${resource.callCount} appel(s) observe(s)`
+    ),
+    ...report.fetchedResources.map((resource) => [
+      `${resource.resourcePath} : ${resource.itemCount} element(s)`,
+      `cles=${resource.objectKeys.join(",") || "-"}`,
+      `types=${resource.typeValues.join(",") || "-"}`
+    ].join(" ; ")),
+    `Relations comptes : ${relationships.matchedTransactionAccounts} liee(s), ${relationships.unmatchedTransactionAccounts} absente(s)`,
+    `Relations categories : ${relationships.matchedTransactionCategories} liee(s), ${relationships.unmatchedTransactionCategories} absente(s)`,
+    `Classifications : ${relationships.classifiedLoanAccounts} credit(s), ${relationships.classifiedInvestmentAccounts} investissement(s)`
+  ];
+}
+
 function renderExportSummary(
   data: PatrimoineBankinExport,
   status = "Export pret",
@@ -134,7 +160,8 @@ function renderExportSummary(
     `Transactions recuperees : ${data.metadata.transactionCount}`,
     `Periode : ${data.metadata.fromDate ?? "-"} au ${data.metadata.toDate ?? "-"}`,
     `Statut : ${status}`,
-    ...getValidationLines(validation)
+    ...getValidationLines(validation),
+    ...renderSecureDiagnostics(lastDiagnosticReport)
   ].join("\n"), tone);
 }
 
@@ -183,6 +210,9 @@ async function fetchNormalizedExport(): Promise<{ data: PatrimoineBankinExport; 
     ...getFetchOptions(),
     onProgress: updateProgress
   });
+  lastDiagnosticReport = currentSettings.debugMode
+    ? buildSecureDiagnosticReport(raw, await getObservedBankinResources())
+    : null;
   const normalized = await normalizeBankinExport(raw);
   const data = applyAccountSettings(normalized);
   const validation = validatePatrimoineExport(data);
