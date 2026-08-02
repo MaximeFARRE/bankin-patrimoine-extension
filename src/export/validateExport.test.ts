@@ -14,6 +14,7 @@ function buildExport(overrides: Partial<PatrimoineBankinExport> = {}): Patrimoin
         source: "bankin",
         sourceAccountId: "account-1",
         accountName: "Compte courant",
+        sourceAccountType: "checking",
         accountKind: "checking",
         accountSubtype: "current",
         balanceKind: "cash",

@@ -44,7 +44,7 @@ export type PatrimoineAccount = {
   sourceAccountId: string;
   accountName: string;
   bankName?: string;
-  sourceAccountType?: string;
+  sourceAccountType: string;
   accountKind: PatrimoineAccountKind;
   accountSubtype: PatrimoineAccountSubtype;
   balanceKind: PatrimoineBalanceKind;

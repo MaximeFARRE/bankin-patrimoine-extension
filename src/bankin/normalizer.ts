@@ -53,7 +53,7 @@ export function normalizeAccount(account: BankinAccount): PatrimoineAccount {
     sourceAccountId: asString(account.id),
     accountName: account.name ?? "Compte sans nom",
     bankName: account.bank?.name,
-    sourceAccountType: account.type,
+    sourceAccountType: account.type ?? "unknown",
     accountType: account.type,
     ...classification,
     balance: account.balance,
@@ -68,7 +68,7 @@ function normalizeTransactionAccount(transaction: BankinTransaction): Patrimoine
   }
 
   const embeddedAccount = transaction.account;
-  const sourceAccountType = embeddedAccount?.type;
+  const sourceAccountType = embeddedAccount?.type ?? "unknown";
   const classification = classifyBankinAccount({
     type: sourceAccountType,
     subtype: embeddedAccount?.subtype,

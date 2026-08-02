@@ -77,7 +77,17 @@ export function validatePatrimoineExport(data: PatrimoineBankinExport): ExportVa
   }
 
   for (const account of data.accounts) {
-    if (!hasValue(account.sourceAccountId) || !hasValue(account.accountName) || !hasValue(account.currency)) {
+    if (
+      !hasValue(account.sourceAccountId) ||
+      !hasValue(account.accountName) ||
+      !hasValue(account.sourceAccountType) ||
+      !hasValue(account.accountKind) ||
+      !hasValue(account.accountSubtype) ||
+      !hasValue(account.balanceKind) ||
+      !hasValue(account.currency) ||
+      typeof account.isAsset !== "boolean" ||
+      typeof account.isLiability !== "boolean"
+    ) {
       issues.push({
         severity: "error",
         code: "invalid_account",

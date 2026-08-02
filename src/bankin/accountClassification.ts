@@ -62,7 +62,7 @@ function detailsFor(kind: PatrimoineAccountKind): Pick<AccountClassification, "b
 
 export function classifyBankinAccount(account: Pick<BankinAccount, "type" | "subtype" | "name">): AccountClassification {
   const explicitType = classifyExplicitType(account.type);
-  const explicitSubtype = classifyText(account.subtype);
+  const explicitSubtype = classifyExplicitType(account.subtype) ?? classifyText(account.subtype);
   const inferredName = classifyText(account.name);
   const base = explicitType ?? explicitSubtype ?? inferredName ?? { accountKind: "unknown", accountSubtype: "unknown" };
   const compatibleSubtype = explicitSubtype ?? inferredName;
