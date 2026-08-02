@@ -69,12 +69,14 @@ describe("normalizeBankinExport", () => {
 
     const normalized = await normalizeBankinExport(raw);
 
-    expect(normalized.accounts).toEqual([
+    expect(normalized.accounts).toMatchObject([
       {
         source: "bankin",
         sourceAccountId: "123",
         accountName: "Compte archive",
         bankName: "Banque test",
+        accountKind: "unknown",
+        accountSubtype: "unknown",
         currency: "EUR"
       }
     ]);

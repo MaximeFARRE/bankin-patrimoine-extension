@@ -38,6 +38,10 @@ export type BankinTransaction = {
   account?: {
     id?: number | string;
     name?: string;
+    type?: string;
+    subtype?: string;
+    currency_code?: string;
+    currency?: string;
     bank?: {
       id?: number | string;
       name?: string;

@@ -7,6 +7,8 @@ import type {
 } from "../types/patrimoine";
 import { getDateRange } from "../utils/dates";
 import { buildTransactionHash, normalizeLabel } from "../utils/hash";
+import { getDuplicateStats } from "../export/duplicateStats";
+import { classifyBankinAccount } from "./accountClassification";
 
 function asString(value: number | string | undefined | null): string {
   return value == null ? "" : String(value);
@@ -44,12 +46,16 @@ function flattenCategories(categories: BankinCategory[]): BankinCategory[] {
 }
 
 export function normalizeAccount(account: BankinAccount): PatrimoineAccount {
+  const classification = classifyBankinAccount(account);
+
   return {
     source: "bankin",
     sourceAccountId: asString(account.id),
     accountName: account.name ?? "Compte sans nom",
     bankName: account.bank?.name,
+    sourceAccountType: account.type,
     accountType: account.type,
+    ...classification,
     balance: account.balance,
     currency: getCurrency(account)
   };
@@ -61,12 +67,23 @@ function normalizeTransactionAccount(transaction: BankinTransaction): Patrimoine
     return null;
   }
 
+  const embeddedAccount = transaction.account;
+  const sourceAccountType = embeddedAccount?.type;
+  const classification = classifyBankinAccount({
+    type: sourceAccountType,
+    subtype: embeddedAccount?.subtype,
+    name: embeddedAccount?.name
+  });
+
   return {
     source: "bankin",
     sourceAccountId,
     accountName: transaction.account?.name ?? `Compte Bankin ${sourceAccountId}`,
     bankName: transaction.account?.bank?.name,
-    currency: getCurrency(transaction)
+    sourceAccountType,
+    accountType: sourceAccountType,
+    ...classification,
+    currency: getCurrency(embeddedAccount ?? transaction)
   };
 }
 
@@ -91,6 +108,7 @@ export async function normalizeTransaction(
   const category = sourceCategoryId ? categoriesById.get(sourceCategoryId) : undefined;
   const labelRaw = getLabel(transaction);
   const currency = getCurrency(transaction);
+  const normalizedAccount = account ? normalizeAccount(account) : normalizeTransactionAccount(transaction);
 
   return {
     source: "bankin",
@@ -106,6 +124,9 @@ export async function normalizeTransaction(
     categoryName: category?.name ?? transaction.category?.name,
     bankName: account?.bank?.name ?? transaction.account?.bank?.name,
     accountName: account?.name ?? transaction.account?.name,
+    sourceAccountType: normalizedAccount?.sourceAccountType,
+    accountKind: normalizedAccount?.accountKind,
+    accountSubtype: normalizedAccount?.accountSubtype,
     transactionHash: await buildTransactionHash({
       sourceAccountId,
       date: transaction.date,
@@ -136,19 +157,37 @@ export async function normalizeBankinExport(raw: BankinRawExport): Promise<Patri
   }
 
   const accounts = Array.from(normalizedAccountsById.values());
+  const loans = accounts
+    .filter((account) => account.accountKind === "loan")
+    .map((account) => ({
+      source: "bankin" as const,
+      sourceLoanId: account.sourceAccountId,
+      sourceAccountId: account.sourceAccountId,
+      loanType: account.accountSubtype ?? "unknown" as const,
+      outstandingPrincipal: account.balance == null ? undefined : Math.abs(account.balance),
+      currency: account.currency
+    }));
   const range = getDateRange(transactions.map((transaction) => transaction.date));
 
   return {
     source: "bankin",
     exportedAt: new Date().toISOString(),
-    exportVersion: "1.0",
+    exportVersion: "2.0",
     accounts,
+    loans,
+    positions: [],
     categories: categories.map(normalizeCategory),
     transactions,
     metadata: {
       transactionCount: transactions.length,
       accountCount: accounts.length,
       categoryCount: categories.length,
+      loanCount: loans.length,
+      positionCount: 0,
+      validation: {
+        repeatedTransactionHashes: getDuplicateStats(transactions.map((transaction) => transaction.transactionHash)),
+        duplicatedSourceTransactionIds: getDuplicateStats(transactions.map((transaction) => transaction.sourceTransactionId))
+      },
       ...range
     }
   };
