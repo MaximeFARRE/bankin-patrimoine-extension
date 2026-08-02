@@ -1,19 +1,19 @@
 export type PatrimoineBankinExport = {
   source: "bankin";
   exportedAt: string;
-  exportVersion: "1.0" | "2.0";
+  exportVersion: "2.0";
   accounts: PatrimoineAccount[];
-  loans?: PatrimoineLoan[];
-  positions?: PatrimoinePosition[];
+  loans: PatrimoineLoan[];
+  positions: PatrimoinePosition[];
   categories: PatrimoineCategory[];
   transactions: PatrimoineTransaction[];
   metadata: {
     transactionCount: number;
     accountCount: number;
     categoryCount: number;
-    loanCount?: number;
-    positionCount?: number;
-    validation?: PatrimoineValidationMetadata;
+    loanCount: number;
+    positionCount: number;
+    validation: PatrimoineValidationMetadata;
     fromDate?: string;
     toDate?: string;
   };
@@ -45,11 +45,11 @@ export type PatrimoineAccount = {
   accountName: string;
   bankName?: string;
   sourceAccountType?: string;
-  accountKind?: PatrimoineAccountKind;
-  accountSubtype?: PatrimoineAccountSubtype;
-  balanceKind?: PatrimoineBalanceKind;
-  isAsset?: boolean;
-  isLiability?: boolean;
+  accountKind: PatrimoineAccountKind;
+  accountSubtype: PatrimoineAccountSubtype;
+  balanceKind: PatrimoineBalanceKind;
+  isAsset: boolean;
+  isLiability: boolean;
   /** @deprecated Use sourceAccountType. Preserved for v1 consumers. */
   accountType?: string;
   balance?: number;

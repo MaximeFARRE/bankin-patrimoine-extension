@@ -7,11 +7,18 @@ function buildExport(overrides: Partial<PatrimoineBankinExport> = {}): Patrimoin
     source: "bankin",
     exportedAt: "2026-06-06T00:00:00.000Z",
     exportVersion: "2.0",
+    loans: [],
+    positions: [],
     accounts: [
       {
         source: "bankin",
         sourceAccountId: "account-1",
         accountName: "Compte courant",
+        accountKind: "checking",
+        accountSubtype: "current",
+        balanceKind: "cash",
+        isAsset: true,
+        isLiability: false,
         currency: "EUR"
       }
     ],
@@ -39,7 +46,13 @@ function buildExport(overrides: Partial<PatrimoineBankinExport> = {}): Patrimoin
     metadata: {
       transactionCount: 1,
       accountCount: 1,
-      categoryCount: 1
+      categoryCount: 1,
+      loanCount: 0,
+      positionCount: 0,
+      validation: {
+        repeatedTransactionHashes: { groupCount: 0, affectedLineCount: 0, excessLineCount: 0 },
+        duplicatedSourceTransactionIds: { groupCount: 0, affectedLineCount: 0, excessLineCount: 0 }
+      }
     },
     ...overrides
   };

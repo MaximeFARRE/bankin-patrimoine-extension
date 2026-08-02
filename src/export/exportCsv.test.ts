@@ -8,6 +8,8 @@ describe("buildTransactionsCsv", () => {
       source: "bankin",
       exportedAt: "2026-06-06T00:00:00.000Z",
       exportVersion: "2.0",
+      loans: [],
+      positions: [],
       accounts: [],
       categories: [],
       transactions: [
@@ -29,7 +31,13 @@ describe("buildTransactionsCsv", () => {
       metadata: {
         transactionCount: 1,
         accountCount: 0,
-        categoryCount: 0
+        categoryCount: 0,
+        loanCount: 0,
+        positionCount: 0,
+        validation: {
+          repeatedTransactionHashes: { groupCount: 0, affectedLineCount: 0, excessLineCount: 0 },
+          duplicatedSourceTransactionIds: { groupCount: 0, affectedLineCount: 0, excessLineCount: 0 }
+        }
       }
     };
 
