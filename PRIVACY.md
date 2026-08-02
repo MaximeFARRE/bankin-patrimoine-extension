@@ -13,10 +13,12 @@ The extension can process:
 - Bankin categories;
 - Bankin transactions;
 - local extension settings, such as an import URL, import key, default start date, and display options.
+- sanitized diagnostic metadata when diagnostic mode is enabled (resource path, method, call count, and timestamp).
 
 ## Local Storage
 
-Bankin request headers and extension settings are stored in `chrome.storage.local`.
+Bankin request headers, extension settings, and optional sanitized diagnostic metadata are stored in
+`chrome.storage.local`.
 
 They stay on the user's device unless the user explicitly exports a file or sends normalized data to a configured app endpoint.
 
@@ -30,6 +32,9 @@ The extension can generate:
 Exports are created locally by the browser and downloaded by Chrome.
 
 Do not share exported files publicly. They can contain sensitive financial data.
+
+Diagnostic metadata excludes query strings and redacts identifiers in resource paths. Diagnostic summaries contain
+schema keys, type values, counts, and relationship statistics only; they never contain full financial payloads.
 
 ## Optional Import To A Personal App
 

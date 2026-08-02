@@ -10,10 +10,12 @@ The extension runs locally in the user's browser. It does not ask for Bankin cre
 
 - Detects an active Bankin Web session.
 - Captures the required Bankin API request headers locally in `chrome.storage.local`.
-- Fetches accounts, categories, and transactions from Bankin's web API.
+- Fetches the proven Bankin resources: `/v2/accounts`, `/v2/categories`, and `/v2/transactions`.
 - Handles pagination.
 - Normalizes Bankin data into a stable `PatrimoineBankinExport` JSON format.
 - Exports JSON and optional CSV files.
+- Classifies checking, savings, investment, loan, card, and unknown accounts conservatively.
+- Can record a safe structural diagnostic of other Bankin resources observed in the browser.
 - Displays a clear export summary: accounts, categories, transactions, period, validation warnings, and errors.
 - Can optionally send the normalized export to a configured personal app endpoint.
 
@@ -73,6 +75,9 @@ Then in Chrome:
 6. Click `Preview` to check counts, period, and validation warnings.
 7. Export JSON or CSV.
 
+JSON is the canonical format for accounts, loans, investments, categories, and transactions. CSV is a
+transaction-oriented convenience format and cannot represent every patrimoine structure.
+
 The extension validates the export before download or import:
 
 - required account/category/transaction fields;
@@ -93,6 +98,10 @@ The popup settings can configure:
 - whether to show the CSV export button;
 - diagnostic mode.
 
+Diagnostic mode never calls guessed endpoints. It passively records sanitized Bankin resource paths and reports
+only item counts, object keys, account `type` values, and relationship counts. Query strings, identifiers in paths,
+authentication headers, tokens, names, balances, transaction descriptions, and complete payloads are excluded.
+
 The expected app endpoint is:
 
 ```http
@@ -111,19 +120,39 @@ Top-level JSON shape:
 type PatrimoineBankinExport = {
   source: "bankin";
   exportedAt: string;
-  exportVersion: "1.0";
+  exportVersion: "2.0";
   accounts: PatrimoineAccount[];
+  loans: PatrimoineLoan[];
+  positions: PatrimoinePosition[];
   categories: PatrimoineCategory[];
   transactions: PatrimoineTransaction[];
   metadata: {
     transactionCount: number;
     accountCount: number;
     categoryCount: number;
+    loanCount: number;
+    positionCount: number;
+    validation: {
+      repeatedTransactionHashes: DuplicateStats;
+      duplicatedSourceTransactionIds: DuplicateStats;
+    };
     fromDate?: string;
     toDate?: string;
   };
 };
 ```
+
+Each account preserves the v1 fields and adds `sourceAccountType`, `accountKind`, `accountSubtype`, `balanceKind`,
+`isAsset`, and `isLiability`. Transactions also carry the linked account type and classification when available.
+Loan accounts expose a separate `loans` entry with a positive `outstandingPrincipal`; positions use a dedicated
+`positions` collection. An aggregated investment balance is marked `market_value`, never `cash`.
+
+No unproven Bankin loan or investment endpoint is called. If Bankin Web exposes one, enable diagnostic mode,
+navigate to the relevant Bankin screen, and use the sanitized resource report as evidence before adding support.
+
+Consumers upgrading from v1 must accept `exportVersion: "2.0"`, read the new account classification fields,
+import `loans` and `positions`, treat `outstanding_debt` as a liability without inferring its sign, and continue to
+deduplicate transactions by `sourceTransactionId` rather than dropping distinct transactions that share a hash.
 
 See [src/types/patrimoine.ts](src/types/patrimoine.ts) for the full schema.
 
