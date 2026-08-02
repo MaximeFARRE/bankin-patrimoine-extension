@@ -1,4 +1,5 @@
 import type { PatrimoineBankinExport } from "../types/patrimoine";
+import { getDuplicateStats } from "./duplicateStats";
 
 export type ExportValidationIssue = {
   severity: "error" | "warning";
@@ -27,10 +28,23 @@ function hasValue(value: unknown): boolean {
   return value !== undefined && value !== null && value !== "";
 }
 
-function countDuplicates(values: string[]): number {
-  return Array.from(
-    values.reduce((counts, value) => counts.set(value, (counts.get(value) ?? 0) + 1), new Map<string, number>())
-  ).filter(([, count]) => count > 1).length;
+const forbiddenSecretKeys = new Set([
+  "authorization",
+  "bankinversion",
+  "clientid",
+  "clientsecret",
+  "importkey",
+  "token"
+]);
+
+function containsSecretKey(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  if (Array.isArray(value)) return value.some(containsSecretKey);
+
+  return Object.entries(value).some(([key, child]) => {
+    const normalizedKey = key.toLowerCase().replace(/[^a-z]/g, "");
+    return forbiddenSecretKeys.has(normalizedKey) || containsSecretKey(child);
+  });
 }
 
 export function validatePatrimoineExport(data: PatrimoineBankinExport): ExportValidationResult {
@@ -46,11 +60,19 @@ export function validatePatrimoineExport(data: PatrimoineBankinExport): ExportVa
     });
   }
 
-  if (data.exportVersion !== "1.0") {
+  if (data.exportVersion !== "2.0") {
     issues.push({
       severity: "error",
       code: "invalid_export_version",
-      message: "La version d'export doit etre 1.0."
+      message: "La version d'export doit etre 2.0."
+    });
+  }
+
+  if (containsSecretKey(data)) {
+    issues.push({
+      severity: "error",
+      code: "secret_in_export",
+      message: "L'export contient un champ reserve aux secrets ou headers Bankin."
     });
   }
 
@@ -108,21 +130,21 @@ export function validatePatrimoineExport(data: PatrimoineBankinExport): ExportVa
     });
   }
 
-  const duplicatedTransactionIds = countDuplicates(data.transactions.map((transaction) => transaction.sourceTransactionId));
-  if (duplicatedTransactionIds > 0) {
+  const duplicatedTransactionIds = getDuplicateStats(data.transactions.map((transaction) => transaction.sourceTransactionId));
+  if (duplicatedTransactionIds.groupCount > 0) {
     issues.push({
       severity: "error",
       code: "duplicate_transaction_id",
-      message: `${duplicatedTransactionIds} identifiant(s) Bankin de transaction sont dupliques.`
+      message: `${duplicatedTransactionIds.groupCount} groupe(s) d'identifiants Bankin dupliques couvrent ${duplicatedTransactionIds.affectedLineCount} lignes (${duplicatedTransactionIds.excessLineCount} excedentaire(s)).`
     });
   }
 
-  const duplicatedHashes = countDuplicates(data.transactions.map((transaction) => transaction.transactionHash));
-  if (duplicatedHashes > 0) {
+  const duplicatedHashes = getDuplicateStats(data.transactions.map((transaction) => transaction.transactionHash));
+  if (duplicatedHashes.groupCount > 0) {
     issues.push({
       severity: "warning",
       code: "duplicate_transaction_hash",
-      message: `${duplicatedHashes} hash(s) anti-doublon sont partages par plusieurs transactions.`
+      message: `${duplicatedHashes.groupCount} groupe(s) de hash repetes couvrent ${duplicatedHashes.affectedLineCount} lignes (${duplicatedHashes.excessLineCount} excedentaire(s)). Les transactions aux identifiants Bankin distincts sont conservees.`
     });
   }
 

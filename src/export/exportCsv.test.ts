@@ -7,7 +7,7 @@ describe("buildTransactionsCsv", () => {
     const data: PatrimoineBankinExport = {
       source: "bankin",
       exportedAt: "2026-06-06T00:00:00.000Z",
-      exportVersion: "1.0",
+      exportVersion: "2.0",
       accounts: [],
       categories: [],
       transactions: [

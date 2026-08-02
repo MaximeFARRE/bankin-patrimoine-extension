@@ -6,7 +6,7 @@ function buildExport(overrides: Partial<PatrimoineBankinExport> = {}): Patrimoin
   return {
     source: "bankin",
     exportedAt: "2026-06-06T00:00:00.000Z",
-    exportVersion: "1.0",
+    exportVersion: "2.0",
     accounts: [
       {
         source: "bankin",
@@ -78,5 +78,32 @@ describe("validatePatrimoineExport", () => {
 
     expect(result.valid).toBe(true);
     expect(result.warnings[0]?.code).toBe("duplicate_transaction_hash");
+    expect(result.warnings[0]?.message).toContain("1 groupe(s)");
+    expect(result.warnings[0]?.message).toContain("2 lignes");
+    expect(result.warnings[0]?.message).toContain("1 excedentaire(s)");
+  });
+
+  it("blocks genuinely duplicated Bankin transaction identifiers", () => {
+    const base = buildExport().transactions[0];
+    const result = validatePatrimoineExport(buildExport({
+      transactions: [base, { ...base, transactionHash: "hash-2" }]
+    }));
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual([
+      expect.objectContaining({ code: "duplicate_transaction_id" })
+    ]);
+  });
+
+  it("blocks authentication fields anywhere in an export", () => {
+    const unsafe = buildExport() as PatrimoineBankinExport & { authorization?: string };
+    unsafe.authorization = "synthetic-secret";
+
+    const result = validatePatrimoineExport(unsafe);
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual([
+      expect.objectContaining({ code: "secret_in_export" })
+    ]);
   });
 });
