@@ -29,7 +29,7 @@ export async function clearAllLocalData(): Promise<void> {
   await chrome.storage.local.remove([BANKIN_HEADERS_KEY, SETTINGS_KEY, OBSERVED_RESOURCES_KEY]);
 }
 
-function sanitizeResourcePath(rawUrl: string): string | null {
+export function sanitizeBankinResourcePath(rawUrl: string): string | null {
   const url = new URL(rawUrl);
   if (url.hostname !== "sync.bankin.com" || !/^\/v[23]\//.test(url.pathname)) return null;
 
@@ -42,7 +42,7 @@ function sanitizeResourcePath(rawUrl: string): string | null {
 
 export async function recordBankinResource(rawUrl: string, method: string): Promise<void> {
   const settings = await getSettings();
-  const resourcePath = sanitizeResourcePath(rawUrl);
+  const resourcePath = sanitizeBankinResourcePath(rawUrl);
   if (!settings.debugMode || !resourcePath) return;
 
   const resources = await getObservedBankinResources();
