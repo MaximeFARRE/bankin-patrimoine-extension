@@ -15,6 +15,9 @@ describe("buildTransactionsCsv", () => {
           source: "bankin",
           sourceTransactionId: "tx-1",
           sourceAccountId: "account-1",
+          sourceAccountType: "checking",
+          accountKind: "checking",
+          accountSubtype: "current",
           date: "2026-06-06",
           amount: -10,
           currency: "EUR",
@@ -31,5 +34,8 @@ describe("buildTransactionsCsv", () => {
     };
 
     expect(buildTransactionsCsv(data)).toContain("\"Achat \"\"test\"\" ligne\"");
+    expect(buildTransactionsCsv(data).split("\r\n")[0]).toContain(
+      "sourceAccountType;accountKind;accountSubtype"
+    );
   });
 });
